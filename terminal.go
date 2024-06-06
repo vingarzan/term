@@ -885,7 +885,7 @@ func (t *Terminal) GetHistory() []string {
 
 	history := make([]string, t.history.size)
 	for i := 0; i < t.history.size; i++ {
-		history[i], _ = t.history.NthPreviousEntry(i)
+		history[i], _ = t.history.NthPreviousEntry(t.history.size - i - 1)
 	}
 	return history
 }
