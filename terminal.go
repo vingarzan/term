@@ -890,7 +890,7 @@ func (t *Terminal) GetHistory() []string {
 	return history
 }
 
-func (t *Terminal) SettHistory(history []string) {
+func (t *Terminal) SetHistory(history []string) {
 	t.lock.Lock()
 	defer t.lock.Unlock()
 
