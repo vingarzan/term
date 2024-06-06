@@ -906,6 +906,13 @@ func (t *Terminal) ClearHistory() {
 	t.history.Clear()
 }
 
+func (t *Terminal) PopHistory() (string, bool) {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	return t.history.Pop()
+}
+
 type pasteIndicatorError struct{}
 
 func (pasteIndicatorError) Error() string {
@@ -977,6 +984,22 @@ func (s *stRingBuffer) Clear() {
 		s.entries[i] = ""
 	}
 	s.size = 0
+}
+
+// Pop the last element from the history.
+func (s *stRingBuffer) Pop() (string, bool) {
+	if s.size == 0 {
+		return "", false
+	}
+	value := s.entries[s.head]
+	s.head--
+	if s.head < 0 {
+		s.head += s.max
+	}
+	if s.size > 0 {
+		s.size--
+	}
+	return value, true
 }
 
 // readPasswordLine reads from reader until it finds \n or io.EOF.
