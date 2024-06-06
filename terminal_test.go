@@ -444,3 +444,13 @@ func TestGetSetHistory(t *testing.T) {
 		t.Errorf("history not set correctly: %v", history)
 	}
 }
+
+func TestClearHistory(t *testing.T) {
+	term := NewTerminal(nil, ">")
+	term.SetHistory([]string{"a", "b", "c"})
+	term.ClearHistory()
+	history := term.GetHistory()
+	if len(history) != 0 {
+		t.Errorf("history not cleared: %v", history)
+	}
+}

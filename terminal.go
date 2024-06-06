@@ -899,6 +899,13 @@ func (t *Terminal) SetHistory(history []string) {
 	}
 }
 
+func (t *Terminal) ClearHistory() {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.history.Clear()
+}
+
 type pasteIndicatorError struct{}
 
 func (pasteIndicatorError) Error() string {
@@ -962,6 +969,14 @@ func (s *stRingBuffer) NthPreviousEntry(n int) (value string, ok bool) {
 		index += s.max
 	}
 	return s.entries[index], true
+}
+
+// Clear removes all elements from the ring buffer.
+func (s *stRingBuffer) Clear() {
+	for i := range s.entries {
+		s.entries[i] = ""
+	}
+	s.size = 0
 }
 
 // readPasswordLine reads from reader until it finds \n or io.EOF.
