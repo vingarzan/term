@@ -879,6 +879,26 @@ func (t *Terminal) SetSize(width, height int) error {
 	return err
 }
 
+func (t *Terminal) GetHistory() []string {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	history := make([]string, t.history.size)
+	for i := 0; i < t.history.size; i++ {
+		history[i], _ = t.history.NthPreviousEntry(i)
+	}
+	return history
+}
+
+func (t *Terminal) SettHistory(history []string) {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	for _, entry := range history {
+		t.history.Add(entry)
+	}
+}
+
 type pasteIndicatorError struct{}
 
 func (pasteIndicatorError) Error() string {
