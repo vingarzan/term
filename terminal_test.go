@@ -435,3 +435,12 @@ func TestOutputNewlines(t *testing.T) {
 		t.Errorf("incorrect output: was %q, expected %q", output, expected)
 	}
 }
+
+func TestGetSetHistory(t *testing.T) {
+	term := NewTerminal(nil, ">")
+	term.SetHistory([]string{"a", "b", "c"})
+	history := term.GetHistory()
+	if len(history) != 3 || history[0] != "a" || history[1] != "b" || history[2] != "c" {
+		t.Errorf("history not set correctly: %v", history)
+	}
+}
