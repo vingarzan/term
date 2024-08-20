@@ -699,11 +699,14 @@ func (t *Terminal) ReadPassword(prompt string) (line string, err error) {
 	oldPrompt := t.prompt
 	t.prompt = []rune(prompt)
 	t.echo = false
+	oldAutoComplete := t.AutoCompleteCallback
+	t.AutoCompleteCallback = nil
 
 	line, err = t.readLine()
 
 	t.prompt = oldPrompt
 	t.echo = true
+	t.AutoCompleteCallback = oldAutoComplete
 
 	return
 }
