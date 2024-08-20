@@ -435,3 +435,50 @@ func TestOutputNewlines(t *testing.T) {
 		t.Errorf("incorrect output: was %q, expected %q", output, expected)
 	}
 }
+
+func TestGetSetHistory(t *testing.T) {
+	term := NewTerminal(nil, ">")
+	term.SetHistory([]string{"a", "b", "c"})
+	history := term.GetHistory()
+	if len(history) != 3 || history[0] != "a" || history[1] != "b" || history[2] != "c" {
+		t.Errorf("history not set correctly: %v", history)
+	}
+}
+
+func TestClearHistory(t *testing.T) {
+	term := NewTerminal(nil, ">")
+	term.SetHistory([]string{"a", "b", "c"})
+	term.ClearHistory()
+	history := term.GetHistory()
+	if len(history) != 0 {
+		t.Errorf("history not cleared: %v", history)
+	}
+}
+
+func TestPopHistory(t *testing.T) {
+	term := NewTerminal(nil, ">")
+	term.SetHistory([]string{"a", "b", "c"})
+	history := term.GetHistory()
+	if len(history) != 3 || history[0] != "a" || history[1] != "b" || history[2] != "c" {
+		t.Errorf("history not set correctly: %v", history)
+	}
+	h, ok := term.PopHistory()
+	if !ok {
+		t.Errorf("history not popped correctly: %v", h)
+	}
+	if h != "c" {
+		t.Errorf("history not popped correctly: %v", h)
+	}
+	history = term.GetHistory()
+	if len(history) != 2 || history[0] != "a" || history[1] != "b" {
+		t.Errorf("history not popped correctly: %v", history)
+	}
+	term.ClearHistory()
+	h, ok = term.PopHistory()
+	if ok {
+		t.Errorf("history not popped correctly: %v", h)
+	}
+	if h != "" {
+		t.Errorf("history not popped correctly: %v", h)
+	}
+}

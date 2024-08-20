@@ -699,11 +699,14 @@ func (t *Terminal) ReadPassword(prompt string) (line string, err error) {
 	oldPrompt := t.prompt
 	t.prompt = []rune(prompt)
 	t.echo = false
+	oldAutoComplete := t.AutoCompleteCallback
+	t.AutoCompleteCallback = nil
 
 	line, err = t.readLine()
 
 	t.prompt = oldPrompt
 	t.echo = true
+	t.AutoCompleteCallback = oldAutoComplete
 
 	return
 }
@@ -879,6 +882,40 @@ func (t *Terminal) SetSize(width, height int) error {
 	return err
 }
 
+func (t *Terminal) GetHistory() []string {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	history := make([]string, t.history.size)
+	for i := 0; i < t.history.size; i++ {
+		history[i], _ = t.history.NthPreviousEntry(t.history.size - i - 1)
+	}
+	return history
+}
+
+func (t *Terminal) SetHistory(history []string) {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	for _, entry := range history {
+		t.history.Add(entry)
+	}
+}
+
+func (t *Terminal) ClearHistory() {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.history.Clear()
+}
+
+func (t *Terminal) PopHistory() (string, bool) {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	return t.history.Pop()
+}
+
 type pasteIndicatorError struct{}
 
 func (pasteIndicatorError) Error() string {
@@ -942,6 +979,30 @@ func (s *stRingBuffer) NthPreviousEntry(n int) (value string, ok bool) {
 		index += s.max
 	}
 	return s.entries[index], true
+}
+
+// Clear removes all elements from the ring buffer.
+func (s *stRingBuffer) Clear() {
+	for i := range s.entries {
+		s.entries[i] = ""
+	}
+	s.size = 0
+}
+
+// Pop the last element from the history.
+func (s *stRingBuffer) Pop() (string, bool) {
+	if s.size == 0 {
+		return "", false
+	}
+	value := s.entries[s.head]
+	s.head--
+	if s.head < 0 {
+		s.head += s.max
+	}
+	if s.size > 0 {
+		s.size--
+	}
+	return value, true
 }
 
 // readPasswordLine reads from reader until it finds \n or io.EOF.
